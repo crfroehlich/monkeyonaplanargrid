@@ -25,14 +25,15 @@
 
     var isRunning = false;
     var isShowingRules = false;
-    //var gridDimensions.width = document.getElementById('textfield_width').value;
-    //var gridDimensions.height = document.getElementById('textfield_height').value;
     var lifecycle = 1;
     var moveCount;
     
     var city;
     var newcity;
     var changed;
+
+    var bePatient = document.getElementById('patience');
+    var theBoard = document.getElementById('board');
 
     var inputs = Object.create(null, {
         height: { value: document.getElementById('textfield_height') },
@@ -52,7 +53,7 @@
             }, 
             set: function(val) {
                 if(1 !== val % 2) {
-                    val += 1;
+                    val = (+val) + 1;
                 }
                 inputs.height.value = val;
             }
@@ -63,7 +64,7 @@
             }, 
             set: function(val) {
                 if(1 !== val % 2) {
-                    val += 1;
+                    val = (+val) + 1;
                 }
                 inputs.width.value = val;
             }
@@ -114,7 +115,7 @@
     }
 
     function createModel() {
-        city = new Array(gridDimensions.width);
+        /*city = new Array(gridDimensions.width);
         newcity = new Array(gridDimensions.width);
         changed = new Array(gridDimensions.width);
         for (var x = 0; x < gridDimensions.width; x++) {
@@ -126,14 +127,16 @@
                 newcity[x][y] = false;
                 changed[x][y] = false;
             }
-        }
+        }*/
     }
 
-    
-
-    
-
     function createBoard() {
+        
+        theBoard.style.display = 'none';
+        bePatient.style.display = 'block';
+        bePatient.innerHTML = 'The board is rendering. This will take a few moments. Please be patient.';
+        console.time('Board rendering.');
+        
         (function clearBoard() {
             //delete all rows
             var arena = document.getElementById('playarea');
@@ -153,20 +156,30 @@
         function iterateGrid(onEachRow, onEachCell) {
             return iterate(gridDimensions.height, function(rowNo) {
                 var row = onEachRow(rowNo);
-                return iterate(gridDimensions.width, function(cellNo) {
-                    return onEachCell(row, cellNo);
+               
+                iterate(gridDimensions.width, function(cellNo) {
+                    var cell = onEachCell(row, cellNo);
+                    row.appendChild(cell);
                 });
+                
+                arena.appendChild(row);
+                if(rowNo === +gridDimensions.height) {
+                    finished = true;
+                }
             });
+           
         }
-        
+        var finished = false;
         var arena = document.getElementById('playarea');
         iterateGrid(function onEachRow(rowNo) {
-            var row = arena.insertRow();
+            var row = document.createElement('tr');
             var yIndex = rowNo - gridDimensions.zero();
             row.y = yIndex;
+            
             return row;
         }, function onEachCell(row, cellNo) {
-            var cell = row.insertCell();
+            var cell = document.createElement('td');
+           
             cell.y = row.y;
             
             var xIndex = gridDimensions.zero() - cellNo;
@@ -176,19 +189,39 @@
             
             if(cell.y === 0 && cell.x === 0) {
                 cell.className = 'cell hot';
+                cell.innerHTML = '0';
             }
-            else if(cell.y === 0 || cell.x === 0) {
+            else if(cell.y === 0) {
                 cell.className = 'cell zero';
+                cell.innerHTML = cell.x;
+            }
+            else if(cell.x === 0) {
+                cell.className = 'cell zero';
+                cell.innerHTML = cell.y;
             } else {
                 cell.className = 'cell dud';
+                cell.innerHTML = '&nbsp;';
             }
-            cell.innerHTML = '&nbsp;';
+            
             
             cell.alive = false;
             cell.onmouseenter = function() { return validateCell(cell); };
             cell.onmouseleave = function() { return validateCell(); };
-        })
-
+            return cell;
+        });
+        
+        setTimeout(function wait() {
+            if(finished) {
+                theBoard.style.display = 'inline';
+                bePatient.style.display = 'none';
+                bePatient.innerHTML = '';
+                console.timeEnd('Board rendering.');
+            } else {
+                bePatient.innerHTML += '.';
+                setTimeout(wait, 100);
+            }
+        }, 100);
+        
         moveCount = 0;
     }
 
