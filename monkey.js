@@ -1,7 +1,7 @@
 (function() {
     
     /**
-     * Get the sum of the digits of any two, absolute numbers.
+     * Get the sum of the digits of any two numbers using their absolute value.
     */
     function getCoordinateSum(x, y) {
         function sumOfDigits(aNumber) {
@@ -92,11 +92,38 @@
     buttons.rules.onclick = showRules;
     buttons.step.onclick = stepOnce;
 
+    var cells;
+
     function resetState() {
+        var expectedCellCount = gridDimensions.height * gridDimensions.width;
+        
+        theBoard.style.display = 'none';
+        bePatient.style.display = 'block';
+        bePatient.innerHTML = 'The board is rendering. This will take a few moments. Please be patient.';
+        console.time('Board rendering.');
+        
+        //As we scale up the grid size for testing, leave some feedback that this will take a moment or two
+        setTimeout(function wait() {
+            if(cells && expectedCellCount == (cells.hot.length + cells.cold.length)) {
+                theBoard.style.display = 'inline';
+                bePatient.style.display = 'none';
+                bePatient.innerHTML = '';
+                console.timeEnd('Board rendering.');
+            } else {
+                bePatient.innerHTML += '.';
+                setTimeout(wait, 100);
+            }
+        }, 100);
+        
         isRunning = false;
         moveCount = 0;
-        createModel();
-        createBoard();
+        cells = createBoard();
+        
+        
+        
+    
+    
+        
         buttons.run.innerHTML = 'Run';
         buttons.run.title = 'Start the algorithm';
     }
@@ -114,29 +141,19 @@
         }
     }
 
-    function createModel() {
-        /*city = new Array(gridDimensions.width);
-        newcity = new Array(gridDimensions.width);
-        changed = new Array(gridDimensions.width);
-        for (var x = 0; x < gridDimensions.width; x++) {
-            city[x] = new Array(gridDimensions.height);
-            newcity[x] = new Array(gridDimensions.height);
-            changed[x] = new Array(gridDimensions.height);
-            for (var y = 0; y < gridDimensions.height; y++) {
-                city[x][y] = false;
-                newcity[x][y] = false;
-                changed[x][y] = false;
-            }
-        }*/
-    }
-
+    /**
+     * Initiate the board. Setup the table cells, create the x/y index. Return an object of arrays of cells.
+    */
     function createBoard() {
+        var ret = {
+            hot: [],
+            cold: [],
+            duds: []
+        };
         
-        theBoard.style.display = 'none';
-        bePatient.style.display = 'block';
-        bePatient.innerHTML = 'The board is rendering. This will take a few moments. Please be patient.';
-        console.time('Board rendering.');
-        
+        var arena = document.getElementById('playarea');
+                
+        //Purge the former board
         (function clearBoard() {
             //delete all rows
             var arena = document.getElementById('playarea');
@@ -145,6 +162,7 @@
             }
         }());
         
+        //Simple row/column iterator on 1-based index. Executes a callback inside each iteration.
         function iterate(len, onEach) {
             for (var i= 1; i <= len; i += 1) {
                 if(onEach) {
@@ -153,6 +171,8 @@
             }
         }
     
+        //Iterate from 1 to the width for each iteration of 1 to the height. Execute a callback inside each iteration.
+        //The onEachRow callback must return a row. The onEachCell callback must return a cell.
         function iterateGrid(onEachRow, onEachCell) {
             return iterate(gridDimensions.height, function(rowNo) {
                 var row = onEachRow(rowNo);
@@ -169,11 +189,28 @@
             });
            
         }
-        var finished = false;
-        var arena = document.getElementById('playarea');
+        
+        //For visual validation of the algorithm, callback to validate any given cell in the grid.
+        function validateCell(cell) {
+            var validateDiv = document.getElementById('validate');
+            var text = '';
+            if(cell) {
+                var sumofCoords = getCoordinateSum(cell.x, cell.y);
+                
+                validateDiv.style.display = 'block';
+                text = 'Position (' + cell.x + ', ' + cell.y + ') is ';
+                if(sumofCoords > 19) {
+                    text += 'NOT ';
+                }
+                text += 'accessible, because the sum of its coords is ' + sumofCoords;
+            }
+            validateDiv.innerHTML = text;
+        }
+        
+        //Now, actually build the grid.
         iterateGrid(function onEachRow(rowNo) {
             var row = document.createElement('tr');
-            var yIndex = rowNo - gridDimensions.zero();
+            var yIndex = gridDimensions.zero() - rowNo;
             row.y = yIndex;
             
             return row;
@@ -182,7 +219,7 @@
            
             cell.y = row.y;
             
-            var xIndex = gridDimensions.zero() - cellNo;
+            var xIndex = cellNo - gridDimensions.zero();
             cell.dataset.x = xIndex;
             cell.dataset.y = cell.y;
             cell.x = xIndex;
@@ -190,56 +227,34 @@
             if(cell.y === 0 && cell.x === 0) {
                 cell.className = 'cell hot';
                 cell.innerHTML = '0';
-            }
-            else if(cell.y === 0) {
-                cell.className = 'cell zero';
-                cell.innerHTML = cell.x;
-            }
-            else if(cell.x === 0) {
-                cell.className = 'cell zero';
-                cell.innerHTML = cell.y;
+                ret.hot.push(cell); //We can touch this coord
             } else {
-                cell.className = 'cell dud';
-                cell.innerHTML = '&nbsp;';
+                ret.cold.push(cell); //We don't know if we can touch this coord. Let's not try to figure it out now, just cache it for later.
+                if(cell.y === 0) {
+                    cell.className = 'cell zero';
+                    cell.innerHTML = cell.x;
+                }
+                else if(cell.x === 0) {
+                    cell.className = 'cell zero';
+                    cell.innerHTML = cell.y;
+                } else {
+                    cell.className = 'cell dud';
+                    cell.innerHTML = '&nbsp;';
+                }
             }
-            
             
             cell.alive = false;
             cell.onmouseenter = function() { return validateCell(cell); };
             cell.onmouseleave = function() { return validateCell(); };
             return cell;
         });
+
+        //We've (almost) always hit (0,0)
+        moveCount = ret.hot.length;
         
-        setTimeout(function wait() {
-            if(finished) {
-                theBoard.style.display = 'inline';
-                bePatient.style.display = 'none';
-                bePatient.innerHTML = '';
-                console.timeEnd('Board rendering.');
-            } else {
-                bePatient.innerHTML += '.';
-                setTimeout(wait, 100);
-            }
-        }, 100);
-        
-        moveCount = 0;
+        return ret;
     }
 
-    function validateCell(cell) {
-        var validateDiv = document.getElementById('validate');
-        var text = '';
-        if(cell) {
-            var sumofCoords = getCoordinateSum(cell.x, cell.y);
-            
-            validateDiv.style.display = 'block';
-            text = 'Position (' + cell.x + ', ' + cell.y + ') is ';
-            if(sumofCoords > 19) {
-                text += 'NOT ';
-            }
-            text += 'accessible, because the sum of its coords is ' + sumofCoords;
-        }
-        validateDiv.innerHTML = text;
-    }
 
      function toggleRunningState() {
         isRunning = !(isRunning);
@@ -272,7 +287,6 @@
         step();
     }
 
-    
 
     function step() {
         moveCount += 1;
