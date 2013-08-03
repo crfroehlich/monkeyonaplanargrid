@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>A Monkey on a Planar Grid</title>
+        <meta name="description" content="A visualized solution to the Monkey problem">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" type="text/css" href="monkey.css">
+    </head>
+    
+    <body class="x-body x-webkit x-chrome x-reset">
+        <!--[if lte IE 9]>
+            <p class="chromeframe">You are using an
+                <strong>outdated</strong>browser. Please
+                <a href="http://browsehappy.com/">upgrade your browser</a>or
+                <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a>to improve your experience.</p>
+        <![endif]-->
+        
+        <h3 id="explanation">
+            There is a monkey which can walk around on a planar grid.
+        </h3>
+        
+        <h4 id="question">
+            How many points, the sum of whose digits is less than or equal to 19, can the monkey access if it starts at (0, 0), including (0, 0) itself?
+        </h4>
+        
+        <div>
+    		Using a <input type="number" size="3" id="textfield_width" title="Width" value="25"/> x 
+            <input type="number" size="3" id="textfield_height" title="Height" value="25"/> grid. 
+		</div>
+	
+		<br/>
+	
+		<table>
+		<tr valign="top">
+			<td>
+				<table id="playarea" cellspacing="0" cellpadding="1" border="1" title="The monkey can travel to any red coordinate. Hover over any coordinate to validate.">
+				</table>
+	
+				<br/>
+	
+				<button id="button_reset" title="Clear the board and start over">Reset</button>&nbsp;
+				<button id="button_step" title="Step through the algorithm iteration-by-iteration">Step</button>&nbsp;
+				<button id="button_run" title="Run the algorithm">Run</button>&nbsp;
+				<button id="button_rules" title="Show/hide the rules for Monkey Movement">Rules...</button>
+			</td>
+			<td>
+				<div id="generation" title="The current total number of possible moves">0</div><br>
+				<div id="validate" title="Is the Sum of the Coordinates less than or equal to 19?"></div>
+			</td>
+			<td>
+				<div id="container_rules" style="display: none;">
+					<div>
+						<b>Rules for Monkey Movement:</b>
+					</div>
+					<ol>
+						<li>The monkey can move one space at a time left, right, up or down.</li>
+                        <li>For example, the point (59, 79) is inaccessible because 5 + 9 + 7 + 9 = 30, which is greater than 19.</li>
+                        <li>Points where the sum of the digits of the absolute value of the x coordinate plus the sum of the digits of the absolute value of the y coordinate are lesser than or equal to 19 are accessible to the monkey.</li>
+                        <li>That is, from (x, y) the monkey can go to (x+1, y), (x-1, y), (x, y+1), and (x, y-1).</li>
+                        <li>Another example: the point (-5, -7) is accessible because abs(-5) + abs(-7) = 5 + 7 = 12, which is less than 19.</li>
+					</ol>
+				</div>
+			</td>
+		</tr>
+		</table>
+	
+		<br/>
+		<br/>
+	
+		<hr width="100%" noshade size="3"/>
+        
+        
+        <script type="text/javascript" src="monkey.js"></script>
+    </body>
+
+</html>

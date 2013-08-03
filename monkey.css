@@ -1,0 +1,52 @@
+body {
+    background-color: ghostwhite;
+    font-family: Arial;
+    font-size: 9pt;
+}
+h1 {
+    font-family: Arial;
+    font-size: 24pt;
+}
+small {
+    font-family: Arial;
+    font-size: 8pt;
+    font-style: italic;
+}
+button {
+    width: 80px;
+    height: 23px;
+    font-size: 8pt;
+}
+.small {
+    width: 40px;
+    height: 23px;
+    margin-left: 10px;
+}
+.cell {
+    width: 5px;
+    height: 5px;
+    font-size: 2px;
+}
+.dud {
+    background-color: white;
+}
+.hot {
+    background-color: red;
+}
+.zero {
+    background-color: yellow;
+}
+#generation {
+    font-family: Arial;
+    font-size: 20pt;
+    font-style: italic;
+    color: black;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+#container_rules {
+    font-size: 8pt;
+    border: 1px solid lightsteelblue;
+    padding: 3px;
+    margin-bottom: 10px;
+}
