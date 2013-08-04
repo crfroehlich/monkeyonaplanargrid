@@ -33,20 +33,17 @@ button {
 .hot {
     background-color: red;
 }
+.warm {
+    background-color: orange;
+}
 .zero {
     background-color: yellow;
 }
-#generation {
+#monkey_game_answer {
     font-family: Arial;
-    font-size: 20pt;
+    font-size: 16pt;
     font-style: italic;
-    color: black;
+    color: green;
     padding-left: 20px;
     padding-right: 20px;
-}
-#container_rules {
-    font-size: 8pt;
-    border: 1px solid lightsteelblue;
-    padding: 3px;
-    margin-bottom: 10px;
 }
